@@ -3,6 +3,7 @@ package pl.weakpoint.findmycar.map
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -10,19 +11,22 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.widget.Toast
 import com.google.android.gms.location.*
-import org.osmdroid.config.Configuration
-
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.views.MapView
-import pl.weakpoint.findmycar.R
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.api.IMapController
-
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.ItemizedIconOverlay
+import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.mylocation.SimpleLocationOverlay
+import pl.weakpoint.findmycar.R
 
 
 class DisplayMapActivity : Activity() {
     private var mLocationCallback: LocationCallback? = null
     private var MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0
+    private var singleLocationOverlay : SimpleLocationOverlay? = null
+    var currentLocationOverlay: ItemizedIconOverlay<OverlayItem>? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +46,45 @@ class DisplayMapActivity : Activity() {
 
         startLocationUpdates(mapController, LocationServices.getFusedLocationProviderClient(this))
 
+        singleLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.person)) as BitmapDrawable).bitmap)
+        singleLocationOverlay?.setLocation(startPoint)
 
+        map.overlays.add(singleLocationOverlay);
+        /*
+        var resourceProxy : DefaultResourceProxyImpl
+
+        val currentLocation = GeoPoint(55.860863, 37.115046)
+        val currentLocation2 = GeoPoint(55.8653, 37.11556)
+        var myLocationOverlayItem = OverlayItem("Here", "Current Position", currentLocation)
+        var myCurrentLocationMarker = this.resources.getDrawable(R.drawable.person)
+        myLocationOverlayItem.setMarker(myCurrentLocationMarker)
+
+        val items = ArrayList<OverlayItem>()
+        items.add(myLocationOverlayItem)
+
+
+
+        myLocationOverlayItem = OverlayItem("Here", "Current Position", currentLocation2)
+        myCurrentLocationMarker = this.resources.getDrawable(R.drawable.person)
+        myLocationOverlayItem.setMarker(myCurrentLocationMarker)
+
+
+        items.add(myLocationOverlayItem)
+
+
+
+        currentLocationOverlay = ItemizedIconOverlay(items,
+                object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
+                    override fun onItemSingleTapUp(index: Int, item: OverlayItem): Boolean {
+                        return true
+                    }
+
+                    override fun onItemLongPress(index: Int, item: OverlayItem): Boolean {
+                        return true
+                    }
+                }, resourceProxy)
+        map.getOverlays().add(singleLocationOverlay)
+        */
     }
 
     public override fun onResume() {
