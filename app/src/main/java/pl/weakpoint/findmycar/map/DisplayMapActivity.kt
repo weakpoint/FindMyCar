@@ -23,9 +23,9 @@ import pl.weakpoint.findmycar.R
 
 
 class DisplayMapActivity : Activity() {
-    private var mLocationCallback: LocationCallback? = null
+    private lateinit var mLocationCallback: LocationCallback
     private var MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0
-    private var singleLocationOverlay : SimpleLocationOverlay? = null
+    private lateinit var singleLocationOverlay : SimpleLocationOverlay
     var currentLocationOverlay: ItemizedIconOverlay<OverlayItem>? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,13 +47,13 @@ class DisplayMapActivity : Activity() {
         startLocationUpdates(mapController, LocationServices.getFusedLocationProviderClient(this))
 
         singleLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.person)) as BitmapDrawable).bitmap)
-        singleLocationOverlay?.setLocation(startPoint)
+        singleLocationOverlay.setLocation(startPoint)
 
-        map.overlays.add(singleLocationOverlay);
-        /*
-        var resourceProxy : DefaultResourceProxyImpl
+        map.overlays.add(singleLocationOverlay)
 
-        val currentLocation = GeoPoint(55.860863, 37.115046)
+
+/*
+        val currentLocation = startPoint//GeoPoint(55.860863, 37.115046)
         val currentLocation2 = GeoPoint(55.8653, 37.11556)
         var myLocationOverlayItem = OverlayItem("Here", "Current Position", currentLocation)
         var myCurrentLocationMarker = this.resources.getDrawable(R.drawable.person)
@@ -82,9 +82,9 @@ class DisplayMapActivity : Activity() {
                     override fun onItemLongPress(index: Int, item: OverlayItem): Boolean {
                         return true
                     }
-                }, resourceProxy)
+                }, this)
         map.getOverlays().add(singleLocationOverlay)
-        */
+*/
     }
 
     public override fun onResume() {
@@ -124,13 +124,8 @@ class DisplayMapActivity : Activity() {
                     Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
 
-                // Should we show an explanation?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
 
                 } else {
 

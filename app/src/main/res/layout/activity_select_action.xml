@@ -44,7 +44,7 @@
         android:layout_width="383dp"
         android:layout_height="78dp"
         app:adSize="BANNER"
-        app:adUnitId="unit"
+        app:adUnitId="@string/google_ad_id"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

@@ -1,44 +1,30 @@
 package pl.weakpoint.findmycar
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-
-import kotlinx.android.synthetic.main.activity_select_action.*
-import com.google.android.gms.ads.AdView
-import android.widget.LinearLayout
-import android.widget.TableLayout
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import android.widget.EditText
-import android.content.Intent
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import pl.weakpoint.findmycar.map.DisplayMapActivity
-import com.google.android.gms.tasks.Task
-import android.content.IntentSender
-import android.location.Location
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.common.api.ApiException
-import android.support.annotation.NonNull
-import com.google.android.gms.location.*
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.location.LocationCallback
 
 
 class SelectActionActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_MESSAGE = "SelectActionActivityExtraMessage"
     }
+    lateinit var mAdView : AdView
 
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_action)
+        initializeAds()
+
+
         //startLocationUpdates()
     }
 
@@ -60,6 +46,13 @@ class SelectActionActivity : AppCompatActivity() {
         intent.putExtra(EXTRA_MESSAGE, "")
         startActivity(intent)
 
+    }
+
+    fun initializeAds(){
+        MobileAds.initialize(this, getString(R.string.google_ad_id))
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
     }
 
 }
