@@ -23,8 +23,8 @@ import pl.weakpoint.findmycar.R
 
 
 class DisplayMapActivity : Activity() {
-    private lateinit var mLocationCallback: LocationCallback
-    private var MY_PERMISSIONS_REQUEST_FINE_LOCATION = 0
+    //private lateinit var mLocationCallback: LocationCallback
+
     private lateinit var singleLocationOverlay : SimpleLocationOverlay
     var currentLocationOverlay: ItemizedIconOverlay<OverlayItem>? = null
 
@@ -35,16 +35,20 @@ class DisplayMapActivity : Activity() {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_display_map)
 
+        val bundle = intent.extras
+        val mCurrentLocation = bundle.getParcelable<Location>("location")
         val map = findViewById<MapView>(R.id.map) as MapView
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setBuiltInZoomControls(true)
         map.setMultiTouchControls(true)
         val mapController = map.controller
         mapController.setZoom(15)
-        val startPoint = GeoPoint(52.8583, 21.2944)
+        val startPoint = if (mCurrentLocation != null) {
+            GeoPoint(mCurrentLocation.latitude, mCurrentLocation.longitude)
+        } else {
+            GeoPoint(52.8583, 21.2944)
+        }
         mapController.setCenter(startPoint)
-
-        startLocationUpdates(mapController, LocationServices.getFusedLocationProviderClient(this))
 
         singleLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.person)) as BitmapDrawable).bitmap)
         singleLocationOverlay.setLocation(startPoint)
@@ -94,65 +98,6 @@ class DisplayMapActivity : Activity() {
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().save(this, prefs);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
-    }
-
-    private fun startLocationUpdates(mapController: IMapController, mFusedLocationClient : FusedLocationProviderClient) {
-        val mLocationRequest = LocationRequest()
-        mLocationRequest.interval = 10000
-        mLocationRequest.fastestInterval = 10000
-        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        mLocationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                for (location: Location in locationResult.locations) {
-                    val startPoint = GeoPoint(location.latitude, location.longitude)
-                    //mapController.setZoom(18)
-                    mapController.setCenter(startPoint)
-
-                    Toast.makeText(
-                            getApplicationContext(),
-                            "Latitude:\t\t" + location.latitude + "\n" +
-                                    "Longitude:\t" + location.longitude,
-                            Toast.LENGTH_LONG).show()
-                }
-            }
-
-        }
-
-        try {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                } else {
-
-                    // No explanation needed, we can request the permission.
-
-                    ActivityCompat.requestPermissions(this,
-                            arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
-                            MY_PERMISSIONS_REQUEST_FINE_LOCATION)
-
-                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                    // app-defined int constant. The callback method gets the
-                    // result of the request.
-                }
-            }
-                mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                        mLocationCallback,
-                        null /* Looper */)
-
-        } catch (e: SecurityException) {
-
-//            Snackbar.make(view, "Error: " + e.message, Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null).show()
-
-        }
-
-
-
     }
 
 }
