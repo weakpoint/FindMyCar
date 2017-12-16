@@ -22,10 +22,6 @@ import pl.weakpoint.findmycar.BuildConfig
 import pl.weakpoint.findmycar.R
 
 class LocalizationTracker (private val activity: Activity, var callbackfunction : (Location) -> Unit) {
-
-    init {
-        initialize()
-    }
     
     private val REQUEST_PERMISSIONS_REQUEST_CODE = 34
     private val REQUEST_CHECK_SETTINGS = 0x1
@@ -47,6 +43,9 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
         val KEY_LOCATION = "location"
     }
 
+    init {
+        initialize()
+    }
 
     private fun initialize() {
         updateValuesFromBundle(activity.intent.extras)

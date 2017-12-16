@@ -19,10 +19,6 @@ class SelectActionActivity : AppCompatActivity() {
 
     private lateinit var mCurrentLocation: Location
     private lateinit var mAdView: AdView
-
-
-    private val KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates"
-    private val KEY_LOCATION = "location"
     private val TAG = "SelectActivity"
     private lateinit var tracker : LocalizationTracker
 
@@ -45,14 +41,14 @@ class SelectActionActivity : AppCompatActivity() {
         val intent = Intent(this, DisplayMapActivity::class.java)
         var bundle = Bundle()
         mCurrentLocation = tracker.mCurrentLocation
-        bundle.putParcelable(KEY_LOCATION, mCurrentLocation)
+        bundle.putParcelable(LocalizationTracker.KEY_LOCATION, mCurrentLocation)
         intent.putExtras(bundle)
 
         startActivity(intent)
 
     }
     private fun onLocationUpdate(location : Location) {
-
+        Toast.makeText(this, "Coords: " + location.latitude + " - "+ location.longitude, Toast.LENGTH_LONG).show()
     }
 
 
