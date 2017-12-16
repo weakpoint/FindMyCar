@@ -2,6 +2,7 @@ package pl.weakpoint.findmycar.map
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
@@ -20,13 +21,14 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay
 import org.osmdroid.views.overlay.OverlayItem
 import org.osmdroid.views.overlay.mylocation.SimpleLocationOverlay
 import pl.weakpoint.findmycar.R
+import pl.weakpoint.findmycar.location.LocalizationTracker
 
 
 class DisplayMapActivity : Activity() {
-    //private lateinit var mLocationCallback: LocationCallback
 
     private lateinit var singleLocationOverlay : SimpleLocationOverlay
     var currentLocationOverlay: ItemizedIconOverlay<OverlayItem>? = null
+    private lateinit var tracker : LocalizationTracker
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,16 +37,23 @@ class DisplayMapActivity : Activity() {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_display_map)
 
+
+
         val bundle = intent.extras
-        val mCurrentLocation = bundle.getParcelable<Location>("location")
+        val selectedPosition = bundle.getParcelable<Location>(LocalizationTracker.KEY_LOCATION)
+
         val map = findViewById<MapView>(R.id.map) as MapView
+
+        tracker = LocalizationTracker(this, {location -> onLocationUpdate(location, map)})
+        tracker.startLocationTracking()
+
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setBuiltInZoomControls(true)
         map.setMultiTouchControls(true)
         val mapController = map.controller
         mapController.setZoom(15)
-        val startPoint = if (mCurrentLocation != null) {
-            GeoPoint(mCurrentLocation.latitude, mCurrentLocation.longitude)
+        val startPoint = if (selectedPosition != null) {
+            GeoPoint(selectedPosition.latitude, selectedPosition.longitude)
         } else {
             GeoPoint(52.8583, 21.2944)
         }
@@ -54,45 +63,16 @@ class DisplayMapActivity : Activity() {
         singleLocationOverlay.setLocation(startPoint)
 
         map.overlays.add(singleLocationOverlay)
+    }
 
-
-/*
-        val currentLocation = startPoint//GeoPoint(55.860863, 37.115046)
-        val currentLocation2 = GeoPoint(55.8653, 37.11556)
-        var myLocationOverlayItem = OverlayItem("Here", "Current Position", currentLocation)
-        var myCurrentLocationMarker = this.resources.getDrawable(R.drawable.person)
-        myLocationOverlayItem.setMarker(myCurrentLocationMarker)
-
-        val items = ArrayList<OverlayItem>()
-        items.add(myLocationOverlayItem)
-
-
-
-        myLocationOverlayItem = OverlayItem("Here", "Current Position", currentLocation2)
-        myCurrentLocationMarker = this.resources.getDrawable(R.drawable.person)
-        myLocationOverlayItem.setMarker(myCurrentLocationMarker)
-
-
-        items.add(myLocationOverlayItem)
-
-
-
-        currentLocationOverlay = ItemizedIconOverlay(items,
-                object : ItemizedIconOverlay.OnItemGestureListener<OverlayItem> {
-                    override fun onItemSingleTapUp(index: Int, item: OverlayItem): Boolean {
-                        return true
-                    }
-
-                    override fun onItemLongPress(index: Int, item: OverlayItem): Boolean {
-                        return true
-                    }
-                }, this)
-        map.getOverlays().add(singleLocationOverlay)
-*/
+    private fun onLocationUpdate(location : Location, map : MapView) {
+        map.controller.setCenter( GeoPoint(location.latitude, location.longitude))
+        Toast.makeText(this, "Coords: " + location.latitude + " - "+ location.longitude, Toast.LENGTH_LONG).show()
     }
 
     public override fun onResume() {
         super.onResume()
+        tracker.onResume()
         //this will refresh the osmdroid configuration on resuming.
         //if you make changes to the configuration, use
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -100,4 +80,23 @@ class DisplayMapActivity : Activity() {
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
     }
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        tracker.onSaveInstanceState(outState)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        tracker.onPause()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        tracker.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        tracker.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 }
