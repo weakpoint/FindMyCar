@@ -27,8 +27,9 @@ import pl.weakpoint.findmycar.location.LocalizationTracker
 class DisplayMapActivity : Activity() {
 
     private lateinit var singleLocationOverlay : SimpleLocationOverlay
-    var currentLocationOverlay: ItemizedIconOverlay<OverlayItem>? = null
+    private lateinit var currentLocationOverlay : SimpleLocationOverlay
     private lateinit var tracker : LocalizationTracker
+    private var selectedPosition : Location? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,10 +38,8 @@ class DisplayMapActivity : Activity() {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         setContentView(R.layout.activity_display_map)
 
-
-
         val bundle = intent.extras
-        val selectedPosition = bundle.getParcelable<Location>(LocalizationTracker.KEY_LOCATION)
+        selectedPosition = bundle.getParcelable<Location>(LocalizationTracker.KEY_LOCATION)
 
         val map = findViewById<MapView>(R.id.map) as MapView
 
@@ -52,21 +51,28 @@ class DisplayMapActivity : Activity() {
         map.setMultiTouchControls(true)
         val mapController = map.controller
         mapController.setZoom(15)
-        val startPoint = if (selectedPosition != null) {
-            GeoPoint(selectedPosition.latitude, selectedPosition.longitude)
-        } else {
-            GeoPoint(52.8583, 21.2944)
+
+        val startPoint = selectedPosition?.let {
+            location ->  GeoPoint(location.latitude, location.longitude)
+        } ?: run {
+            GeoPoint(52.000, 21.000)
         }
+
         mapController.setCenter(startPoint)
 
-        singleLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.person)) as BitmapDrawable).bitmap)
+        singleLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.marker_default)) as BitmapDrawable).bitmap)
         singleLocationOverlay.setLocation(startPoint)
 
+        currentLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.person)) as BitmapDrawable).bitmap)
+        currentLocationOverlay.setLocation(startPoint)
+
         map.overlays.add(singleLocationOverlay)
+        map.overlays.add(currentLocationOverlay)
     }
 
     private fun onLocationUpdate(location : Location, map : MapView) {
-        map.controller.setCenter( GeoPoint(location.latitude, location.longitude))
+        //map.controller.setCenter( GeoPoint(location.latitude, location.longitude))
+        currentLocationOverlay.setLocation(GeoPoint(location.latitude, location.longitude))
         Toast.makeText(this, "Coords: " + location.latitude + " - "+ location.longitude, Toast.LENGTH_LONG).show()
     }
 
@@ -78,11 +84,16 @@ class DisplayMapActivity : Activity() {
         //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Configuration.getInstance().save(this, prefs);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         tracker.onSaveInstanceState(outState)
+        val selectedPosition = intent.extras.getParcelable<Location>(LocalizationTracker.KEY_LOCATION)
+        if(selectedPosition != null) {
+            outState!!.putParcelable(getString(R.string.selected_localization), selectedPosition)
+        }
     }
 
     override fun onPause() {

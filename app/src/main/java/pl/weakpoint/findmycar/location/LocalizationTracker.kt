@@ -33,7 +33,7 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
     private lateinit var mLocationRequest: LocationRequest
     private lateinit var mLocationSettingsRequest: LocationSettingsRequest
     private lateinit var mLocationCallback: LocationCallback
-    lateinit var mCurrentLocation: Location
+    var mCurrentLocation: Location? = null
     private var mRequestingLocationUpdates: Boolean = false
 
     private val KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates"
@@ -103,10 +103,11 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
     private fun createLocationCallback() {
         mLocationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations) {
-                    mCurrentLocation = location
+                    mCurrentLocation = locationResult.lastLocation
+
+                if(locationResult.lastLocation != null) {
+                    callbackfunction(locationResult.lastLocation)
                 }
-                callbackfunction(mCurrentLocation)
             }
         }
     }
@@ -139,7 +140,7 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
                         mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                                 mLocationCallback, null)
                     } catch (e: SecurityException) {
-                        Toast.makeText(activity, "Security: : " + e.message, Toast.LENGTH_LONG).show()
+                        Toast.makeText(activity, "Security: " + e.message, Toast.LENGTH_LONG).show()
                     }
                 }
                 .addOnFailureListener(activity) { e ->
@@ -182,7 +183,9 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
      */
     fun onSaveInstanceState(savedInstanceState: Bundle?) {
         savedInstanceState!!.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates)
-        savedInstanceState.putParcelable(KEY_LOCATION, mCurrentLocation)
+        if(mCurrentLocation != null) {
+            savedInstanceState!!.putParcelable(KEY_LOCATION, mCurrentLocation)
+        }
     }
 
     /**
@@ -240,7 +243,6 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
         Log.i(TAG, "onRequestPermissionResult")
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.isEmpty()) {
-  
                 Log.i(TAG, "User interaction was cancelled.")
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (mRequestingLocationUpdates) {

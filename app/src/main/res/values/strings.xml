@@ -6,4 +6,10 @@
     <string name="permission_rationale">Please enable localization on your device</string>
     <string name="permission_denied_explanation">Application can not work properly without localization permission</string>
     <string name="settings">settings</string>
+    <string name="getCords">Get Coords</string>
+    <string name="newCords">New Coords</string>
+    <string name="selected_latitude">selectedLatitude</string>
+    <string name="selected_longitude">selectedLongitude</string>
+    <string name="selected_localization">selectedLocalization</string>
+    <string name="cannot_find_location">Can not set current position - check location settings (maybe internet connection can help)</string>
 </resources>

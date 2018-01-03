@@ -10,6 +10,7 @@
 
     <Button
         android:id="@+id/setPoint"
+        style="@style/Widget.AppCompat.Button"
         android:layout_width="250dp"
         android:layout_height="51dp"
         android:layout_marginBottom="30dp"
@@ -17,7 +18,7 @@
         android:layout_marginStart="60dp"
         android:layout_marginTop="8dp"
         android:onClick="setNewPointOnClick"
-        android:text="New Coords"
+        android:text="@string/newCords"
         app:layout_constraintBottom_toTopOf="@+id/getPoint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -26,14 +27,14 @@
 
     <Button
         android:id="@+id/getPoint"
-        style="@style/Widget.AppCompat.Button.Colored"
+        style="@style/Widget.AppCompat.Button"
         android:layout_width="250dp"
         android:layout_height="48dp"
         android:layout_marginBottom="232dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:onClick="getCoordsOnClick"
-        android:text="Get Coords"
+        android:text="@string/getCords"
         app:layout_constraintBottom_toTopOf="@+id/adView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -48,5 +49,17 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/status"
+        android:layout_width="33dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        android:adjustViewBounds="false"
+        android:contentDescription="gps status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/presence_busy" />
 
 </android.support.constraint.ConstraintLayout>
