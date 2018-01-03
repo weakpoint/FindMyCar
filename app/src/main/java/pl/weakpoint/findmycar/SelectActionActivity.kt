@@ -40,7 +40,7 @@ class SelectActionActivity : AppCompatActivity() {
 
     fun setNewPointOnClick(view: View) {
         var message = "Current position saved "
-        if (mCurrentLocation?.latitude != null) {
+        if (mCurrentLocation?.latitude != null && isGpsEnabled()) {
             selectedLocation = mCurrentLocation
             message += "" + mCurrentLocation?.latitude + " " + mCurrentLocation?.longitude
             val sharedPref = getPreferences(Context.MODE_PRIVATE);
@@ -49,6 +49,9 @@ class SelectActionActivity : AppCompatActivity() {
             editor.putString(getString(R.string.selected_longitude), mCurrentLocation?.longitude.toString())
             editor.commit()
         } else {
+            if(!isGpsEnabled()){
+                mCurrentLocation = null
+            }
             message = getString(R.string.cannot_find_location)
         }
 
@@ -120,8 +123,6 @@ class SelectActionActivity : AppCompatActivity() {
 
     fun isGpsEnabled(): Boolean {
         val lm = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        //val ns = this.getSystemService(Context.NETWORK_STATS_SERVICE) as NetworkStatsManager
-
         try {
             return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
         } catch (e: Exception) {
