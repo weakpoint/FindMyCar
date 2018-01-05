@@ -76,7 +76,7 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
 
         mFusedLocationClient.removeLocationUpdates(mLocationCallback)
                 .addOnCompleteListener(activity) {
-                    mRequestingLocationUpdates = false
+                   // mRequestingLocationUpdates = false
                 }
     }
 
@@ -167,6 +167,7 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
     }
 
     public fun onResume() {
+        updateValuesFromBundle(activity.intent.extras)
         if (mRequestingLocationUpdates && checkPermissions()) {
             startLocationUpdates()
         } else if (!checkPermissions()) {
@@ -186,6 +187,7 @@ class LocalizationTracker (private val activity: Activity, var callbackfunction 
         if(mCurrentLocation != null) {
             savedInstanceState!!.putParcelable(KEY_LOCATION, mCurrentLocation)
         }
+
     }
 
     /**

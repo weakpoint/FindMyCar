@@ -29,7 +29,7 @@ class DisplayMapActivity : Activity() {
     private lateinit var singleLocationOverlay : SimpleLocationOverlay
     private lateinit var currentLocationOverlay : SimpleLocationOverlay
     private lateinit var tracker : LocalizationTracker
-    private var selectedPosition : Location? = null
+    private var selectedPosition : GeoPoint? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +39,7 @@ class DisplayMapActivity : Activity() {
         setContentView(R.layout.activity_display_map)
 
         val bundle = intent.extras
-        selectedPosition = bundle.getParcelable<Location>(LocalizationTracker.KEY_LOCATION)
+        selectedPosition = bundle.getParcelable<GeoPoint>(getString(R.string.selected_localization))
 
         val map = findViewById<MapView>(R.id.map) as MapView
 
@@ -52,11 +52,8 @@ class DisplayMapActivity : Activity() {
         val mapController = map.controller
         mapController.setZoom(15)
 
-        val startPoint = selectedPosition?.let {
-            location ->  GeoPoint(location.latitude, location.longitude)
-        } ?: run {
-            GeoPoint(52.000, 21.000)
-        }
+        val startPoint = selectedPosition ?: GeoPoint(52.000, 21.000)
+
 
         mapController.setCenter(startPoint)
 
@@ -71,18 +68,19 @@ class DisplayMapActivity : Activity() {
     }
 
     private fun onLocationUpdate(location : Location, map : MapView) {
-        //map.controller.setCenter( GeoPoint(location.latitude, location.longitude))
+
+        map.overlays.remove(currentLocationOverlay)
+        currentLocationOverlay = SimpleLocationOverlay(((ContextCompat.getDrawable(this,R.drawable.person)) as BitmapDrawable).bitmap)
         currentLocationOverlay.setLocation(GeoPoint(location.latitude, location.longitude))
+        map.overlays.add(currentLocationOverlay)
+        map.invalidate()
+
         Toast.makeText(this, "Coords: " + location.latitude + " - "+ location.longitude, Toast.LENGTH_LONG).show()
     }
 
     public override fun onResume() {
         super.onResume()
         tracker.onResume()
-        //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().save(this, prefs);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
 
     }
@@ -90,7 +88,7 @@ class DisplayMapActivity : Activity() {
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         tracker.onSaveInstanceState(outState)
-        val selectedPosition = intent.extras.getParcelable<Location>(LocalizationTracker.KEY_LOCATION)
+        val selectedPosition = intent.extras.getParcelable<GeoPoint>(getString(R.string.selected_localization))
         if(selectedPosition != null) {
             outState!!.putParcelable(getString(R.string.selected_localization), selectedPosition)
         }

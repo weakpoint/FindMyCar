@@ -1,6 +1,5 @@
 package pl.weakpoint.findmycar
 
-import android.app.usage.NetworkStatsManager
 import android.content.Context
 import android.content.Intent
 import android.location.Location
@@ -18,11 +17,12 @@ import pl.weakpoint.findmycar.location.LocalizationTracker
 import pl.weakpoint.findmycar.map.DisplayMapActivity
 import android.location.LocationManager
 import android.util.Log
+import org.osmdroid.util.GeoPoint
 
 
 class SelectActionActivity : AppCompatActivity() {
     private var mCurrentLocation: Location? = null
-    private var selectedLocation: Location? = null
+    private var selectedPoint: GeoPoint? = null
     private lateinit var mAdView: AdView
     private val TAG = "SelectActivity"
     private lateinit var tracker : LocalizationTracker
@@ -34,14 +34,24 @@ class SelectActionActivity : AppCompatActivity() {
         tracker = LocalizationTracker(this, {location -> onLocationUpdate(location)})
         tracker.startLocationTracking()
 
+        val sharedPref = getPreferences(Context.MODE_PRIVATE);
+        val latitude = sharedPref.getString(getString(R.string.selected_latitude), "")
+        val longitude = sharedPref.getString(getString(R.string.selected_longitude), "")
+
+        if(latitude != null && longitude != null) {
+            //use last selected position? Yes/No
+            selectedPoint = GeoPoint(latitude.toDouble(),  longitude.toDouble())
+        }
+
         manageButtons()
         manageStatus()
+
     }
 
     fun setNewPointOnClick(view: View) {
         var message = "Current position saved "
         if (mCurrentLocation?.latitude != null && isGpsEnabled()) {
-            selectedLocation = mCurrentLocation
+            selectedPoint = GeoPoint((mCurrentLocation as Location).latitude,  (mCurrentLocation as Location).longitude)
             message += "" + mCurrentLocation?.latitude + " " + mCurrentLocation?.longitude
             val sharedPref = getPreferences(Context.MODE_PRIVATE);
             val editor = sharedPref.edit()
@@ -65,11 +75,11 @@ class SelectActionActivity : AppCompatActivity() {
     fun getCoordsOnClick(view: View) {
         val intent = Intent(this, DisplayMapActivity::class.java)
         val bundle = Bundle()
-        bundle.putParcelable(LocalizationTracker.KEY_LOCATION, selectedLocation)
+        bundle.putParcelable(getString(R.string.selected_localization), selectedPoint)
         intent.putExtras(bundle)
 
         startActivity(intent)
-        selectedLocation = null
+        selectedPoint = null
     }
 
     private fun onLocationUpdate(location : Location) {
@@ -107,7 +117,7 @@ class SelectActionActivity : AppCompatActivity() {
 
     fun manageButtons(){
         val button = findViewById<Button>(R.id.getPoint)
-        button.isEnabled = selectedLocation?.latitude != null
+        button.isEnabled = selectedPoint?.latitude != null
     }
 
     fun manageStatus(){
@@ -129,5 +139,15 @@ class SelectActionActivity : AppCompatActivity() {
             Log.e(TAG, "GPS provider check error", e)
         }
         return false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        tracker.onResume()
+        val sharedPref = getPreferences(Context.MODE_PRIVATE);
+        val latitude = sharedPref.getString(getString(R.string.selected_latitude), "")
+        val longitude = sharedPref.getString(getString(R.string.selected_longitude), "")
+
+        selectedPoint = GeoPoint(latitude.toDouble(),  longitude.toDouble())
     }
 }
